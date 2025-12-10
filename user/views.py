@@ -3,7 +3,8 @@ from .forms import LoginForm
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .forms import CustomUserCreationForm, ProfileForm
+from django.contrib.auth.decorators import login_required
+from .forms import CustomUserCreationForm, ProfileForm, RequestForm
 from .models import Request
 
 def user_login(request):
@@ -45,8 +46,9 @@ def register(request):
     return render(request, 'user/register.html', {'form': form})
 
 
+@login_required
 def profile(request):
-    user_requests = Request.objects.filter(user=request.user)
+    user_requests = Request.objects.filter(user=request.user).order_by('-created_at')
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
         if form.is_valid():
@@ -62,21 +64,24 @@ def profile(request):
     })
 
 
+@login_required
 def create_request(request):
     if request.method == 'POST':
-        form = Request(request.POST, request.FILES)
+        form = RequestForm(request.POST, request.FILES)
         if form.is_valid():
             request_instance = form.save(commit=False)
             request_instance.user = request.user
             request_instance.save()
+            messages.success(request, 'Заявка успешно создана!')
             return redirect('profile')
     else:
-        form = Request()
+        form = RequestForm()
 
     return render(request, 'user/create_request.html', {
         'form': form
     })
 
+@login_required
 def delete_request(request, request_id):
     request_instance = get_object_or_404(Request, id=request_id, user=request.user)
 

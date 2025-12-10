@@ -4,6 +4,11 @@
 {% block content %}
 <main>
     <h1>Ваш профиль</h1>
+    
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'create_request' %}" class="btn">Создать новую заявку</a>
+    </div>
+    
     <div class="requests">
         <h2>Ваши заявки</h2>
 
@@ -15,12 +20,24 @@
                         <p>{{ request.description }}</p>
                         <p>Категория: {{ request.category.name }}</p>
                         <p>Статус: {{ request.get_status_display }}</p>
-                        <p>Создано: {{ request.created_at }}</p>
+                        <p>Создано: {{ request.created_at|date:"d.m.Y H:i" }}</p>
+                        {% if request.photo %}
+                            <img src="{{ request.photo.url }}" alt="{{ request.title }}" style="max-width: 500px; max-height: 300px;"/>
+                        {% endif %}
+                        {% if request.comment %}
+                            <p><strong>Комментарий администратора:</strong> {{ request.comment }}</p>
+                        {% endif %}
+                        {% if request.status == 'new' %}
+                            <form method="post" action="{% url 'delete_request' request.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить эту заявку?');">Удалить заявку</button>
+                            </form>
+                        {% endif %}
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>У вас пока нет заявок.</p>
+            <p>У вас пока нет заявок. <a href="{% url 'create_request' %}">Создайте первую заявку</a></p>
         {% endif %}
     </div>
 </main>

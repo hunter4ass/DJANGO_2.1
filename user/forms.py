@@ -72,13 +72,37 @@ class RequestForm(forms.ModelForm):
     class Meta:
         model = Request
         fields = ['title', 'description', 'category', 'photo']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Название заявки',
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Описание проблемы',
+                'rows': 5,
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-control',
+            }),
+            'photo': forms.ClearableFileInput(attrs={
+                'class': 'form-control-file',
+                'accept': 'image/jpeg,image/jpg,image/png,image/bmp',
+            }),
+        }
+        labels = {
+            'title': 'Название',
+            'description': 'Описание',
+            'category': 'Категория',
+            'photo': 'Фотография',
+        }
 
     def clean_photo(self):
         photo = self.cleaned_data.get('photo')
         if photo:
             if photo.size > 2 * 1024 * 1024:  # 2MB
                 raise forms.ValidationError('Размер фото не должен превышать 2MB.')
-            if not photo.name.endswith(('.jpg', '.jpeg', '.png', '.bmp')):
+            if not photo.name.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp')):
                 raise forms.ValidationError('Недопустимый формат файла. Используйте jpg, jpeg, png или bmp.')
         return photo
 

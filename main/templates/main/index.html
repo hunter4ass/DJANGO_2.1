@@ -2,29 +2,36 @@
 
 {% block content %}
     <main>
-
         <h2>Главная</h2>
         {% if user.is_authenticated %}
-            <p>Здарвсвтуй {{ user.username }}!</p>
-        {% if completed_requests %}
-        <ul class="request">
-            {% for request in completed_requests %}
-                <li>
-                    <h3>{{ request.title }}</h3>
-                    <p>Категория: {{ request.category.name }}</p>
-                    <p>Создано: {{ request.created_at }}</p>
-                    {% if request.photo %}
-                        <img src="{{ request.photo.url }}" alt="{{ request.title }}" style="max-width: 500px; max-height: 300px;"/>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Нет заявок.</p>
-    {% endif %}
-
+            <p>Здравствуй {{ user.username }}!</p>
+            <p><a href="{% url 'create_request' %}">Создать новую заявку</a></p>
         {% else %}
-            <p>Здарвсвтуй гость o_0</p>
+            <p>Здравствуй гость! <a href="{% url 'login' %}">Войдите</a> или <a href="{% url 'register' %}">зарегистрируйтесь</a>, чтобы создать заявку.</p>
+        {% endif %}
+
+        <h3>Все заявки</h3>
+        {% if all_requests %}
+            <ul class="request">
+                {% for request_item in all_requests %}
+                    <li>
+                        <h3>{{ request_item.title }}</h3>
+                        <p>{{ request_item.description }}</p>
+                        <p>Категория: {{ request_item.category.name }}</p>
+                        <p>Статус: {{ request_item.get_status_display }}</p>
+                        <p>Автор: {{ request_item.user.username }}</p>
+                        <p>Создано: {{ request_item.created_at|date:"d.m.Y H:i" }}</p>
+                        {% if request_item.photo %}
+                            <img src="{{ request_item.photo.url }}" alt="{{ request_item.title }}" style="max-width: 500px; max-height: 300px;"/>
+                        {% endif %}
+                        {% if request_item.comment %}
+                            <p><strong>Комментарий:</strong> {{ request_item.comment }}</p>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Нет заявок.</p>
         {% endif %}
     </main>
 {% endblock %}
